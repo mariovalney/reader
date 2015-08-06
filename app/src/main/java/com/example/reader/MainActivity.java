@@ -3,6 +3,7 @@ package com.example.reader;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+        // Aprendendo a escrever um LOG...
+        private final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
 
         public PlaceholderFragment() {
         }
@@ -60,6 +63,9 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
+            // Aprendendo a escrever um LOG...
+            Log.e(LOG_TAG, "Não se preocupe, não é um erro mesmo, apenas um teste!");
 
             // Criando uma array falsa de strings com os títulos das nossas Aulas
             String[] data = {
