@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,6 +30,34 @@ public class CategoriesListFragment extends Fragment {
     private final String LOG_TAG = CategoriesListFragment.class.getSimpleName();
 
     public CategoriesListFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Indica que esse fragmento possui um menu
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Já que possui um menu "setHasOptionsMenu(true)", inflamos esse menu
+        inflater.inflate(R.menu.categories_list_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Achamos o id do item selecionado
+        int id = item.getItemId();
+
+        // Se o id for "action_refresh", instanciamos nosssa tarefa assíncrona
+        // Depois executamos essa tarefa
+        if (id == R.id.action_refresh) {
+            FetchReaderAPITask apiTask = new FetchReaderAPITask();
+            apiTask.execute();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -91,22 +122,22 @@ public class CategoriesListFragment extends Fragment {
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
-                    // Se for nulo, mantemos a resposta como "null"
-                    responseJson = null;
+                    // Se a resposta for null, retornamos null
+                    return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 if (buffer.length() == 0) {
-                    // Como o buffer está vazio, a resposta também estará
-                    responseJson = null;
+                    // Como o buffer está vazio, retornamos null
+                    return null;
                 }
 
                 // Atribui o buffer como string à variável que armazena a resposta
                 responseJson = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Erro: ", e);
-                // Como houve uma excessão, deixamos a resposta como null
-                responseJson = null;
+                // Como houve uma excessão, retornamos null
+                return null;
             } finally{
                 if (urlConnection != null) {
                     // Se houve conexão, fechamos

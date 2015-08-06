@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Reader</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+
+    s<string name="action_refresh">Atualizar</string>
+    <string name="action_settings">Configurações</string>
 
 </resources>
