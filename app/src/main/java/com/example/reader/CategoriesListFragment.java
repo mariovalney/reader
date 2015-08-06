@@ -13,6 +13,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,6 +102,75 @@ public class CategoriesListFragment extends Fragment {
 
     public class FetchReaderAPITask extends AsyncTask<Void, Void, Void> {
         private final String LOG_TAG = FetchReaderAPITask.class.getSimpleName();
+
+        private String[] getCategoriesDataFromJson(String readerApiJsonStr)
+                throws JSONException {
+
+            // Lista de "nós" do JSON que vamos ler
+            // Status:
+            final String API_STATUS = "status";
+            // Se o status for ERRO, temos um "erro" com o código e a mensagem do erro:
+            final String API_ERROR = "erro";
+            final String API_ERROR_CODE = "code";
+            final String API_ERROR_MESSAGE = "message";
+            // Se o status for OK, temos uma "response" com o endpoint usado
+            final String API_RESPONSE = "response";
+            final String API_RESPONSE_COUNT = "count";
+
+            // Por enquanto só estamos requisitando o endpoint "categorias"
+            final String API_ENDPOINT_CATEGORIAS = "categorias";
+
+            // Cada categoria possui id, nome e count, mas ignoraremos o ID por enquanto
+            final String API_ENDPOINT_CATEGORIAS_NOME = "nome";
+            final String API_ENDPOINT_CATEGORIAS_COUNT = "count";
+
+            // Instanciamos o JSONObject
+            JSONObject readerApiJson = new JSONObject(readerApiJsonStr);
+
+            // Se o status for "ERROR"
+            if (readerApiJson.getString(API_STATUS) == "ERROR") {
+                String erroCode = readerApiJson.getJSONObject(API_ERROR).getString(API_ERROR_CODE);
+                String erroMessage = readerApiJson.getJSONObject(API_ERROR).getString(API_ERROR_MESSAGE);
+
+                // Escreve um log com o formato "(999) Mensagem"
+                // Veja a lista de erros em: http://api.jangal.com.br/reader/
+                Log.e(LOG_TAG, "Erro na API: (" + erroCode + ") " + erroMessage);
+                return null;
+            }
+
+            // Se o status for "OK"
+            if (readerApiJson.getString(API_STATUS) == "OK") {
+                // Pegamos o Objeto "response"
+                JSONObject response = readerApiJson.getJSONObject(API_RESPONSE);
+
+                // Do Objeto response, pegamos o int count e a array de itens
+                int countCategories = response.getInt(API_RESPONSE_COUNT);
+                JSONArray categoriesArray = response.getJSONArray(API_ENDPOINT_CATEGORIAS);
+
+                // Criamos uma String[] para armazenar cada linha que iremos passar para a View
+                String[] result = new String[countCategories];
+
+                // Fazemos um laço para percorrer os itens da Array
+                for(int i = 0; i < categoriesArray.length(); i++) {
+                    // Pegamos o Obj
+                    JSONObject categoria = categoriesArray.getJSONObject(i);
+
+                    // Lemos o nome e o count dessa categoria
+                    String nome = categoria.getString(API_ENDPOINT_CATEGORIAS_NOME);
+                    String count = categoria.getString(API_ENDPOINT_CATEGORIAS_COUNT);
+
+                    // Como ´s tudo string, concatenamos no formado "Categoria (99)"
+                    result[i] = nome + " (" + count + ")";
+                }
+
+                return result;
+            }
+
+            // Se por algum motivo não tínhamos nem um status "OK", nem um "ERROR"
+            // Então escrevemos o Log e retornamos null
+            Log.e(LOG_TAG, "Erro ao ler o status da resposta");
+            return null;
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
