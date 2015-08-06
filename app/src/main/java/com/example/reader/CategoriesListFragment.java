@@ -32,6 +32,7 @@ import java.util.List;
  */
 public class CategoriesListFragment extends Fragment {
     private final String LOG_TAG = CategoriesListFragment.class.getSimpleName();
+    private ArrayAdapter<String> mListOfCategoriesAdapter;
 
     public CategoriesListFragment() {
     }
@@ -68,13 +69,9 @@ public class CategoriesListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Criando uma array falsa de strings com os títulos das nossas Aulas
+        // Novos dados iniciais
         String[] data = {
-                "Aula 1: Getting Start!",
-                "Aula 2: Como instalar o Android Studio?",
-                "Aula 3: Como criar um projeto no Android Studio?",
-                "Aula 4: O que é Activity e Fragment?",
-                "Aula 5: Como criar a User Interface (UI) do meu Aplicativo Android?"
+                "Atualize os dados..."
         };
 
         // Criando uma lista (ArrayList) com os dados criados acima
@@ -82,7 +79,7 @@ public class CategoriesListFragment extends Fragment {
 
         // Agora que já temos os dados, vamos criar um Adapter, no caso um ArrayAdapter
 
-        ArrayAdapter<String> listOfLastPostsAdapter = new ArrayAdapter<String>(
+        mListOfCategoriesAdapter = new ArrayAdapter<String>(
                 getActivity(), // O contexto atual
                 R.layout.list_item_last_posts, // O arquivo de layout de cada item
                 R.id.list_item_post_title_textview, // O ID do campo a ser preenchido
@@ -94,7 +91,7 @@ public class CategoriesListFragment extends Fragment {
 
         // Cria uma referência para a ListView
         ListView listView = (ListView) rootView.findViewById(R.id.list_last_posts);
-        listView.setAdapter(listOfLastPostsAdapter);
+        listView.setAdapter(mListOfCategoriesAdapter);
 
         // Retornamos tudo
         return rootView;
@@ -128,7 +125,7 @@ public class CategoriesListFragment extends Fragment {
             JSONObject readerApiJson = new JSONObject(readerApiJsonStr);
 
             // Se o status for "ERROR"
-            if (readerApiJson.getString(API_STATUS) == "ERROR") {
+            if (readerApiJson.getString(API_STATUS).equals("ERROR")) {
                 String erroCode = readerApiJson.getJSONObject(API_ERROR).getString(API_ERROR_CODE);
                 String erroMessage = readerApiJson.getJSONObject(API_ERROR).getString(API_ERROR_MESSAGE);
 
@@ -139,7 +136,7 @@ public class CategoriesListFragment extends Fragment {
             }
 
             // Se o status for "OK"
-            if (readerApiJson.getString(API_STATUS) == "OK") {
+            if (readerApiJson.getString(API_STATUS).equals("OK")) {
                 // Pegamos o Objeto "response"
                 JSONObject response = readerApiJson.getJSONObject(API_RESPONSE);
 
@@ -200,6 +197,11 @@ public class CategoriesListFragment extends Fragment {
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+
                 if (buffer.length() == 0) {
                     // Como o buffer está vazio, retornamos null
                     return null;
@@ -234,8 +236,19 @@ public class CategoriesListFragment extends Fragment {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
-            
+
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            // Se o retonorno não for nulo
+            if (result != null) {
+                mListOfCategoriesAdapter.clear();
+                for (String categoryStr : result) {
+                    mListOfCategoriesAdapter.add(categoryStr);
+                }
+            }
         }
     }
 }
