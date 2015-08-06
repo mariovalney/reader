@@ -100,7 +100,7 @@ public class CategoriesListFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchReaderAPITask extends AsyncTask<Void, Void, Void> {
+    public class FetchReaderAPITask extends AsyncTask<Void, Void, String[]> {
         private final String LOG_TAG = FetchReaderAPITask.class.getSimpleName();
 
         private String[] getCategoriesDataFromJson(String readerApiJsonStr)
@@ -173,7 +173,7 @@ public class CategoriesListFragment extends Fragment {
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected String[] doInBackground(Void... voids) {
             // As variáveis da conexão devem ser declaradas fora do try/catch
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -226,6 +226,15 @@ public class CategoriesListFragment extends Fragment {
                     }
                 }
             }
+
+            //Já que "getCategoriesDataFromJson" é throws, usaremos um try/catch
+            try {
+                return getCategoriesDataFromJson(responseJson);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+            
             return null;
         }
     }
